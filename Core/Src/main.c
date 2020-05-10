@@ -34,6 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+uint8_t myTxData[13] = "Hello World\r\n";
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -95,25 +96,32 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
   NRF24_begin(CEpin_GPIO_Port, CSNpin_Pin, CEpin_Pin, hspi2);
   nrf24_DebugUART_Init(huart2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  if(NRF24_Check()){
+	  //Success!
+	  printRadioSettings();
+  }//end if
+  else{
+	  //Failure
+	  while(1){};
+  }//end else
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(NRF24_Check()){
-		  //Success!
-		  while(1){};
-	  }//end if
-	  else{
-		  //Failure
-		  while(1){};
-	  }//end else
+//	  char msg[100];
+//	  sprintf(msg, "Hello, world please work\r\n");
+	  //HAL_UART_Transmit(&nrf24_huart, (uint8_t *)uartTxBuf, strlen(uartTxBuf), 10);
+//	  HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 10);
+//	  HAL_Delay(300);
+
   }
   /* USER CODE END 3 */
 }
@@ -271,7 +279,6 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
