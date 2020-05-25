@@ -233,7 +233,9 @@ void NRF24_begin(GPIO_TypeDef *nrf24PORT, uint16_t nrfCSN_Pin, uint16_t nrfCE_Pi
 	NRF24_ACTIVATE_cmd();
 	NRF24_write_register(0x1c, 0);
 	NRF24_write_register(0x1d, 0);
-	printRadioSettings();
+
+	//printRadioSettings();
+
 	//Initialise retries 15 and delay 1250 usec
 	NRF24_setRetries(15, 15);
 	//Initialise PA level to max (0dB)
@@ -293,8 +295,8 @@ bool NRF24_write( const void* buf, uint8_t len )
   uint8_t observe_tx;
   uint8_t status;
   uint32_t sent_at = HAL_GetTick();
-	const uint32_t timeout = 10; //ms to wait for timeout
-	do
+  const uint32_t timeout = 10; //ms to wait for timeout
+  do
   {
     NRF24_read_registerN(REG_OBSERVE_TX,&observe_tx,1);
 		//Get status register
@@ -306,11 +308,11 @@ bool NRF24_write( const void* buf, uint8_t len )
 //	printStatusReg();
 
 	bool tx_ok, tx_fail;
-  NRF24_whatHappened(&tx_ok,&tx_fail, &ack_payload_available);
+	NRF24_whatHappened(&tx_ok,&tx_fail, &ack_payload_available);
 	retStatus = tx_ok;
 	if ( ack_payload_available )
-  {
-    ack_payload_length = NRF24_getDynamicPayloadSize();
+	{
+		ack_payload_length = NRF24_getDynamicPayloadSize();
 	}
 
 	//Power down
@@ -922,3 +924,115 @@ void printFIFOstatus(void)
 	HAL_UART_Transmit(&nrf24_huart, (uint8_t *)uartTxBuf, strlen(uartTxBuf), 10);
 
 }
+
+void serialPrint(uint8_t* msg){
+	HAL_UART_Transmit(&nrf24_huart, (uint8_t *)msg, strlen(msg), 10);
+}//end serialPrint
+
+void serialPrintln(uint8_t* msg){
+	char returnMe[2] = "\r\n";
+	HAL_UART_Transmit(&nrf24_huart, (uint8_t *)msg, strlen(msg), 10);
+	HAL_UART_Transmit(&nrf24_huart, (uint8_t *)returnMe, strlen(returnMe), 10);
+}//end serialPrintln
+
+/*
+ * Function Mappings
+ *
+ * uC libs					MY libs
+ * RF24::write_payload	==	NRF24_write_payloadS
+ * RF24::startFastWrite	==	startFastWrite
+ *
+ */
+
+
+uint8_t uCm_writePayload(const void* buf, uint8_t data_len, uint8_t multicast_flag){
+	uint8_t status;
+	uint8_t wrPayloadCmd = multicast_flag;
+	data_len = MIN(data_len,payload_size);
+
+
+	uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
+
+	uint8_t DBugBuf = "";
+	sprintf(DBugBuf, "[Writing %u bytes  %u blanks]\r\n", data_len, blank_len);
+	serialPrint(DBugBuf);
+
+	//Begin transaction
+	NRF24_csn(0);
+
+	status = HAL_SPI_Transmit(&nrf24_hspi, &wrPayloadCmd, 1, 100);
+	HAL_SPI_Transmit(&nrf24_hspi, (uint8_t *)buf, data_len, 100);
+	HAL_SPI_Transmit(&nrf24_hspi, 0, blank_len, 100); //Pad 0s for Dynamic len
+	//Bring CSN high
+	NRF24_csn(1);
+
+	return status;
+
+}//end writePayload
+
+void uCm_startFastWrite(const void* buf, uint8_t len, const bool multicast){
+	uCm_writePayload(buf, len,multicast ? CMD_W_TX_PAYLOAD_NO_ACK : CMD_W_TX_PAYLOAD );
+	//if (startTx){
+	//	NRF24_ce(1);
+	//}
+}//end startFastWrite
+
+void uCm_startFastWrite_TX(const void* buf, uint8_t len, const bool multicast, bool startTx){
+	uCm_writePayload(buf, len,multicast ? CMD_W_TX_PAYLOAD_NO_ACK : CMD_W_TX_PAYLOAD );
+	if (startTx){
+		NRF24_ce(1);
+	}
+}
+
+//Missing startTx
+bool uCm_write( const void* buf, uint8_t len, const bool multicast){
+	//Start Writing
+	uCm_startFastWrite(buf,len,multicast);
+
+	//While the status register isn't Max Retransmission-ed or TX Data Sent
+	while( ! (NRF24_get_status()  & ( _BV(BIT_TX_DS) | _BV(BIT_MAX_RT) ))) {
+		#if defined (FAILURE_HANDLING) || defined (RF24_LINUX)
+			if(millis() - timer > 95){
+				errNotify();
+				#if defined (FAILURE_HANDLING)
+				  return 0;
+				#else
+				  delay(100);
+				#endif
+			}
+		#endif
+	}
+
+	NRF24_ce(0);
+	//Clear the two possible interrupt flags with one command
+	NRF24_write_register( REG_STATUS , _BV(BIT_RX_DR) | _BV(BIT_TX_DS) | _BV(BIT_MAX_RT));
+
+	uint8_t status = NRF24_get_status();
+
+  //Max retries exceeded
+  if( status & _BV(BIT_MAX_RT)){
+  	NRF24_flush_tx(); //Only going to be 1 packet int the FIFO at a time using this method, so just flush
+  	return 0;
+  }
+	//TX OK 1 or 0
+  return 1;
+}
+
+//Overloaded function
+bool uCm_write2( const void* buf, uint8_t len ){
+	return uCm_write(buf,len,0);
+}
+
+uint8_t uCm_read( const void* buf, uint8_t len){
+	uint8_t data_len = MIN(len, payload_size);
+	uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
+
+	//Read data from Rx payload buffer
+	NRF24_csn(0);
+	uint8_t cmdRxBuf = CMD_R_RX_PAYLOAD;
+	uint8_t status = HAL_SPI_Transmit(&nrf24_hspi, &cmdRxBuf, 1, 100);
+	HAL_SPI_Receive(&nrf24_hspi, buf, data_len, 100);
+	NRF24_csn(1);
+
+	return status;
+}//end uCm_read

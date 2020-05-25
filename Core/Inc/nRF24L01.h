@@ -104,6 +104,7 @@ Description:
 
 /* P model memory Map */
 #define REG_RPD         0x09
+#define CMD_W_TX_PAYLOAD_NO_ACK 0xB0
 
 /* P model bit Mnemonics */
 #define RF_DR_LOW   5

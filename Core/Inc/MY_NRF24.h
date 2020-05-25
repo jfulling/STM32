@@ -1,3 +1,5 @@
+#ifndef __MY_NRF24_H
+#define __MY_NRF24_H
 /*
 Library:					NRF24L01/NRF24L01+
 Written by:				Mohamed Yaqoob (MYaqoobEmbedded YouTube Channel)
@@ -191,4 +193,16 @@ void printFIFOstatus(void);
 
 uint8_t NRF24_Check(void);
 
+void serialPrint(uint8_t* msg);
+void serialPrintln(uint8_t* msg);
+void serialPrint64(uint64_t* msg);
 
+//void startFastWrite(const void* buf, uint8_t len, const bool multicast, bool startTx);
+uint8_t uCm_writePayload(const void* buf, uint8_t data_len, uint8_t multicast);
+void uCm_startFastWrite(const void* buf, uint8_t len, const bool multicast);
+void uCm_startFastWrite_TX(const void* buf, uint8_t len, const bool multicast, bool startTx);
+
+bool uCm_write( const void* buf, uint8_t len, const bool multicast); //Actual function
+bool uCm_write2( const void* buf, uint8_t len ); //Overloaded function
+uint8_t uCm_read( const void* buf, uint8_t len);
+#endif

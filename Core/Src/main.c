@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MY_NRF24.h"
+#include "Mousejack.h"
 #include "stm32l4xx_hal.h"
 /* USER CODE END Includes */
 
@@ -43,9 +44,7 @@ uint8_t myTxData[13] = "Hello World\r\n";
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-SPI_HandleTypeDef hspi2;
 
-UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -97,8 +96,11 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  NRF24_begin(CEpin_GPIO_Port, CSNpin_Pin, CEpin_Pin, hspi2);
+  //NRF24_begin(CEpin_GPIO_Port, CSNpin_Pin, CEpin_Pin, hspi2);
   nrf24_DebugUART_Init(huart2);
+  while(1){
+	  loop();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,7 +112,7 @@ int main(void)
   else{
 	  //Failure
 	  while(1){};
-  }//end else
+  }//end else*/
   while (1)
   {
     /* USER CODE END WHILE */

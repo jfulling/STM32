@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/MY_NRF24.c \
+../Core/Src/Mousejack.c \
 ../Core/Src/main.c \
 ../Core/Src/stm32l4xx_hal_msp.c \
 ../Core/Src/stm32l4xx_it.c \
@@ -14,6 +15,7 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/MY_NRF24.o \
+./Core/Src/Mousejack.o \
 ./Core/Src/main.o \
 ./Core/Src/stm32l4xx_hal_msp.o \
 ./Core/Src/stm32l4xx_it.o \
@@ -23,6 +25,7 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/MY_NRF24.d \
+./Core/Src/Mousejack.d \
 ./Core/Src/main.d \
 ./Core/Src/stm32l4xx_hal_msp.d \
 ./Core/Src/stm32l4xx_it.d \
@@ -34,6 +37,8 @@ C_DEPS += \
 # Each subdirectory must supply rules for building sources it contributes
 Core/Src/MY_NRF24.o: ../Core/Src/MY_NRF24.c
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DSTM32L4R9xx -DUSE_HAL_DRIVER -DDEBUG -c -I../Drivers/CMSIS/Include -I../Core/Inc -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/MY_NRF24.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+Core/Src/Mousejack.o: ../Core/Src/Mousejack.c
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DSTM32L4R9xx -DUSE_HAL_DRIVER -DDEBUG -c -I../Drivers/CMSIS/Include -I../Core/Inc -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/Mousejack.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/main.o: ../Core/Src/main.c
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DSTM32L4R9xx -DUSE_HAL_DRIVER -DDEBUG -c -I../Drivers/CMSIS/Include -I../Core/Inc -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/main.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/stm32l4xx_hal_msp.o: ../Core/Src/stm32l4xx_hal_msp.c
