@@ -1,0 +1,14 @@
+Mousejack.c:33:6:print_payload_details	336	static
+Mousejack.c:69:10:crc_update	16	static
+Mousejack.c:104:6:transmit	8	static
+Mousejack.c:125:6:scan	96	static
+Mousejack.c:280:6:start_transmit	16	static
+Mousejack.c:319:6:ms_crypt	24	static
+Mousejack.c:326:6:ms_checksum	16	static
+Mousejack.c:335:6:fingerprint	8	static
+Mousejack.c:362:6:ms_transmit	24	static
+Mousejack.c:394:6:log_checksum	24	static
+Mousejack.c:403:6:log_transmit	24	static
+Mousejack.c:438:6:launch_attack	48	static
+Mousejack.c:534:6:reset	120	static
+Mousejack.c:546:6:loop	8	static
