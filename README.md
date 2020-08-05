@@ -11,8 +11,8 @@ Milestone | Status | Extra
 ----------|--------|------
 Learn SPI integration using NRF24L01 | Complete |
 Implement [uC_mousejack](https://github.com/insecurityofthings/uC_mousejack) and modify the NRF24 library | Complete |
-Utilize FreeRTOS hooks to register uC_mousejack library into a parallel task | In progress | 
-Bluetooth Integration for custom control | Not Started | Pending control of uC_Mousejack FreeRTOS task via GUI and basic Android app development as a controller.
+Utilize FreeRTOS hooks to register uC_mousejack library into a parallel task | Complete | 
+Bluetooth Integration for custom control | Not Started | Pending GUI completion, BLE module acquisition, and basic android app for control
 Portable In-System Programmer | Not Started |
 Wireless spectrum analyzer (sub-1GHz) | Not Started|
 Low-Power AM Transmitter| Not Started
